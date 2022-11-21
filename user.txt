@@ -1,0 +1,5 @@
+admin, adm1n
+test, t3st
+user, us3r
+new_user, n3wus3r
+tester, testing
