@@ -209,8 +209,74 @@ def view_mine():
    # file, overwriting what was stored in the file before. 
     with open('tasks.txt', 'w') as f:
         for task in tasks_to_write:
-            f.write(task)          
+            f.write(task)  
+def generate_reports():
+    current_date = datetime.datetime.now()
+    my_task = ''
+    all_tasks = ''
+    number_of_tasks = 0
+    completed_tasks = 0
+    incomplete_tasks = 0
+    overdue_tasks = 0
+    incomplete_percentage = 0
+    overdue_percentage = 0
+    task_overview = []
         
+    # This opens the task.txt file with read/write permissions
+    with open('tasks.txt', 'r+') as f:
+        # This loop will add 1 to the number_of_tasks variable for every line in the tasks.txt
+        # It will also take each task from the file and insert them into a list called all_tasks. The tasks are split by commas 
+        # and then split further into separate lists within the list split by the new line character. 
+        for line in f:
+            number_of_tasks += 1
+            my_task += line
+            all_tasks = [my_split_task.split(",") for my_split_task in my_task.split("\n")]
+
+        # This removes the final empty list element created by the final new line character when the tasks are written to the file.
+        all_tasks.pop(-1)
+
+        # This loop iterates through each task in the all task list. 
+        for task in all_tasks:
+
+            # This strips the space in front of the date stored in the 3rd element in the list then, it is converted into a 
+            # datetime object and stored in a variable called due_date.
+            task[3] = task[3].strip(" ")
+            due_date = datetime.datetime.strptime(task[3], '%d %b %Y')
+
+            # If the final element of each task is equal to " Yes" then 1 is added to the completed_tasks variable.
+            if task[5] == " Yes":
+                completed_tasks += 1
+
+            # If the final element of each task is equal to " No" then 1 is added to the incomplete_tasks variable.
+            elif task[5] == " No":
+                incomplete_tasks += 1
+
+                # If the current date is greater than the due date of the task then 1 is added to overdue_tasks variable
+                if current_date > due_date:
+                    overdue_tasks += 1
+        
+        # The following calculations give us the percentage value of incomplete tasks and overdue tasks and stores them in a
+        # relevant variable.
+        incomplete_percentage = incomplete_tasks / number_of_tasks * 100
+        overdue_percentage = overdue_tasks / number_of_tasks * 100
+
+        # The following block appends all the results of the above check and calculations and stores them in a list.
+        task_overview.append("Number of tasks: " + str(number_of_tasks))
+        task_overview.append("Completed tasks: " + str(completed_tasks))
+        task_overview.append("Incomplete tasks: " + str(incomplete_tasks))
+        task_overview.append("Overdue tasks: " + str(overdue_tasks))
+        task_overview.append("Percentage incomplete: " + str(round(incomplete_percentage, 2)))
+        task_overview.append("Percentage overdue: " + str(round(overdue_percentage, 2)))
+
+    # This opens the task_overview.txt file with write permissions. If it doesn't not exist then it is created. This file will be
+    # overwritten every time this function is called so the values are updated.
+    with open('task_overview.txt', 'w') as f:
+
+        # This loop will iterate through the list and write each value to the task_overview.txt file with a newline character on the end.
+        for item in task_overview:
+            f.write(item + "\n")
+
+
 def view_stats():
     # the number_of_tasks and number_of_users variables are counters store an int.
     number_of_tasks = 0
@@ -289,7 +355,8 @@ while True:
         a - Adding a task
         va - View all tasks
         vm - view my task
-        s - View statictics
+        gr - generate reports
+        ds - View statictics
         e - Exit
         : ''').lower()
     
@@ -327,10 +394,15 @@ while True:
     # them from the file
     elif menu == 'vm':
         view_mine()
+
+    # If the user selects option gr in the menu, the generate_reports() function is called. Two files are generated and populated with
+    # the relevant information.
+    elif menu == 'gr' and username == 'admin':
+        generate_reports()
     
     # If the admin selects option s in the menu, the view_stats() function is called and the user is shown the count of all 
     # users and all tasks
-    elif menu == 's'and username == 'admin':
+    elif menu == 'ds'and username == 'admin':
         view_stats()
 
     # If the user selects option e in the menu the goodbye message is displayed and the program ends
