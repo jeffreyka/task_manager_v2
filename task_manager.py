@@ -2,6 +2,7 @@
 # This import allows the program to access the date functions which
 # will be used to access the current date.
 import datetime 
+import os.path
 
 def reg_user():
     # The set_password boolean is used for the loop that checks whether the user has entered
@@ -221,6 +222,30 @@ def generate_reports():
     incomplete_percentage = 0
     overdue_percentage = 0
     task_overview = []
+   
+
+    number_of_users = 0
+    task_count = 0
+    complete_count = 0
+    incomplete_count = 0
+    overdue_count = 0
+    task_count_per_user = []
+    task_percentage_per_user = []
+    complete_tasks_count = []
+    incomplete_tasks_count = []
+    overdue_tasks_count = []
+    completed_tasks_percentage = []
+    incomplete_tasks_percentage = []
+    overdue_tasks_percentage = []
+    user_overview = []
+    users = ''
+    user_task_count = ''
+    user_task_percentage = ''
+    user_complete_percentage = ''
+    user_incomplete_percentage = ''
+    user_overdue_percentage = ''
+    user_overview_string = ''
+
         
     # This opens the task.txt file with read/write permissions
     with open('tasks.txt', 'r+') as f:
@@ -260,7 +285,7 @@ def generate_reports():
         incomplete_percentage = incomplete_tasks / number_of_tasks * 100
         overdue_percentage = overdue_tasks / number_of_tasks * 100
 
-        # The following block appends all the results of the above check and calculations and stores them in a list.
+        # The following block appends all the results of the above checks and calculations and stores them in a list.
         task_overview.append("Number of tasks: " + str(number_of_tasks))
         task_overview.append("Completed tasks: " + str(completed_tasks))
         task_overview.append("Incomplete tasks: " + str(incomplete_tasks))
@@ -276,25 +301,177 @@ def generate_reports():
         for item in task_overview:
             f.write(item + "\n")
 
-
-def view_stats():
-    # the number_of_tasks and number_of_users variables are counters store an int.
-    number_of_tasks = 0
-    number_of_users = 0
-    # This opens the task.txt file with read/write permissions
-    with open('tasks.txt', 'r+') as f:
-        # This loop will add 1 to the number_of_tasks variable for every line in the tasks.txt
-        for line in f:
-            number_of_tasks += 1
-            
-    # This opens the task.txt file with read/write permissions
+    # This opens the user.txt file with read/write permissions
     with open('user.txt', 'r+') as f:
-        # This loop will add 1 to the number_of_users variable for every line in the tasks.txt
+        # This loop will add 1 to the number_of_users variable for every line in the user.txt
         for line in f:
             number_of_users += 1
+
+        # This loop checks iterates through each task in all_tasks. 
+        for username in all_tasks:
+            # If the username (which is stored in the 0 index position of each task in the list) is not in the users string then 
+            # it is added with a comma and a space. This is then split into a list using the comma and the space and lastly the 
+            # final blank space is removed.
+            if username[0] not in users:
+                users += username[0] + ", "
+                user = users.split(", ")
+                user.pop(-1)
+
+        # This loop iterates through the list of users and the list of tasks. If the username in the user list matches the user in
+        # the task then one is added to the task list. At the end a new list is created stating how many tasks is assigned to each 
+        # user. 
+        # The task_count is reset to 0 for each user.
+        for username in user:
+            for task in all_tasks:
+                if task[0] == username:
+                    task_count += 1
+            user_task_count += "The " + username + " user has " + str(task_count) + " task(s) assigned to them, "
+            task_count_per_user.append(task_count)
+            task_count = 0
+        user_task_count+= "\n"
+        
+        # This loop iterates through the list containing the task count for each user. The percentage is worked out by 
+        # dividing the task count by the total number of tasks and multiplying by 100. The result is then stored in a new list
+        # rounded to two digits.
+        for task in task_count_per_user:
+            user_percentage = task / number_of_tasks * 100
+            task_percentage_per_user.append(str(round(user_percentage, 2)))
+        
+        # This loop uses the enumerate function and iterates through the task percentage per user list using the count function 
+        # created by the enumerate function to move through the user list so that the correct user is selected with the correct
+        # percentage. This is then stored in a string.
+        for count, task in enumerate(task_percentage_per_user):
+            user_task_percentage += "The " + user[count] + " user has " + task + "% of the total tasks assigned to them, "
+        user_task_percentage += "\n"
+
+        # This loop iterates through each username stored in the user list and each task in the all_tasks list.
+        for username in user:
+            for task in all_tasks:
+                # This strips the leading space from the date and assigns it to a variable called due_date so we can compare it easily.
+                task[3] = task[3].strip(" ")
+                due_date = datetime.datetime.strptime(task[3], '%d %b %Y')
+
+                # If the username in the task matches the name in the user list and the task is marked as completed then 1 is added
+                # to the complete count variable.
+                if task[0] == username and task[5] == ' Yes':
+                    complete_count += 1
+                # If the username in the task matches the name in the user list and the task is marked as incomplete then 1 is added
+                # to the incomplete count variable.
+                elif task[0] == username and task[5] == ' No':
+                    incomplete_count += 1
+
+                    # If the factors above are true and the due date is older than the current date then 1 is also added to the overdue
+                    # count variable.
+                    if current_date > due_date:
+                        overdue_count += 1
+
+            # Each total is appended to their relevant lists and the counts are all reset to 0 before moving on to the next user in the user list.
+            complete_tasks_count.append(complete_count)
+            incomplete_tasks_count.append(incomplete_count)
+            overdue_tasks_count.append(overdue_count)
+            complete_count = 0
+            incomplete_count = 0
+            overdue_count = 0
+
+        # These loops use the zip function to iterate through two lists at the same time. This is done so that we can match the 
+        # total tasks assigned to each user to the complete tasks, incomplete tasks and overdue tasks and calculate the percentages.
+        # Once calculated they are appended to the relevant lists.
+        for (total, complete) in zip(task_count_per_user, complete_tasks_count):
+            complete_percentage = complete / total * 100
+            completed_tasks_percentage.append(str(round(complete_percentage, 2)))
+        
+        for (total, incomplete) in zip(task_count_per_user, incomplete_tasks_count):
+            incomplete_percentage = incomplete / total * 100
+            incomplete_tasks_percentage.append(str(round(incomplete_percentage, 2)))
+
+        for (total, overdue) in zip(task_count_per_user, overdue_tasks_count):
+            overdue_percentage = overdue / total * 100
+            overdue_tasks_percentage.append(str(round(overdue_percentage, 2)))
+        
+        # These loops use the enumerate function and iterate through the user complete percentage, user incomplete percentage and
+        # user overdue percentage lists respectively, using the count function created by the enumerate function to move through 
+        # the user list so that the correct user is selected with the correct percentage. This is then stored in a string with a 
+        # newline character appended to the end to help keep the different groups separated.
+        for count, task in enumerate(completed_tasks_percentage):
+            user_complete_percentage += "The " + user[count] + " user has " + task + "% of the total tasks assigned to them marked as complete, "
+        user_complete_percentage += "\n"
+
+        for count, task in enumerate(incomplete_tasks_percentage):
+            user_incomplete_percentage += "The " + user[count] + " user has " + task + "% of the total tasks assigned to them marked as incomplete, "
+        user_incomplete_percentage += "\n"
+
+        for count, task in enumerate(overdue_tasks_percentage):
+            user_overdue_percentage += "The " + user[count] + " user has " + task + "% of the total tasks assigned to them marked as incomplete and overdue, "
+        user_overdue_percentage += "\n"
+
+    # The following block appends all the results of the above checks and calculations and stores them in a list.
+    user_overview.append(f"There are {number_of_users} user(s)")
+    user_overview.append("\n")
+    user_overview.append(user_task_count)
+    user_overview.append(user_task_percentage)
+    user_overview.append(user_complete_percentage)
+    user_overview.append(user_incomplete_percentage)
+    user_overview.append(user_overdue_percentage)
+
+    # This loop iterates through the user_overview list and adds each element to a string called user_overview_string.
+    # This string is then split by the commas and space and the end of each element as well as by the new line characters
+    # at the end of each group which creates a list of lists.
+    for element in user_overview:
+        user_overview_string += element        
+        users_overview = [my_split_users.split(", ") for my_split_users in user_overview_string.split("\n")]
+    
+    # This removes the empty element at the end of the users_overview list.
+    users_overview.pop(-1)
+
+    # This loop removes the empty element at the end of each list contained in the users_overview list.
+    for user in users_overview[1:]:
+        user.pop(-1)
+
+ # This opens the user_overview.txt file with write permissions. If it doesn't not exist then it is created. This file will be
+    # overwritten every time this function is called so the values are updated.
+    with open('user_overview.txt', 'w') as f:
+
+        # The outer loop will iterate through the list containing all the lists. 
+        for item in users_overview:
+            # The inner loop iterates through each element of the lists and writes each value to the user_overview.txt file 
+            # with a newline character on the end.
+            for element in item:
+                f.write(element + "\n")
             
-    # This will print the total amount of tasks and users
-    print(f"\nThere are {number_of_users} users and {number_of_tasks} tasks.")
+            # This adds a newline between each separate peice of information making it easier to see which are related and 
+            # which are different.
+            f.write("\n")
+
+def view_stats():
+
+    # These two variables store a boolean value of True or False depending on whether the task_overview and user_overview files 
+    # have been created yet.
+    task_file_exists = os.path.exists('task_overview.txt')
+    user_file_exists = os.path.exists('user_overview.txt')
+
+    # If the task_overview.txt file does not exist yet then the generate reports function is called before being displayed to
+    # the user.
+    if task_file_exists == False:
+        generate_reports()
+
+    # If the user_overview.txt file does not exist yet then the generate reports function is called before being displayed to
+    # the user.
+    if user_file_exists == False:
+        generate_reports()
+
+    # This opens the task_overview.txt file with read/write permissions
+    with open('task_overview.txt', 'r+') as f:
+        print("Task Overview:\n")
+        # This loop will print each line in the task_overview.txt file
+        for line in f:
+            print(line)
+            
+    # This opens the user_overview.txt file with read/write permissions
+    with open('user_overview.txt', 'r+') as f:
+        print("User Overview: \n")
+        # This loop will print each line in the user_overview.txt file
+        for line in f:
+            print(line)
 
 # The passw and user variables are used to store the values from the file.
 # The username and password variables are used to store the user input.

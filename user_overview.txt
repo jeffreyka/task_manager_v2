@@ -1,0 +1,32 @@
+There are 5 user(s)
+
+The admin user has 2 task(s) assigned to them
+The user user has 1 task(s) assigned to them
+The test user has 1 task(s) assigned to them
+The new_user user has 1 task(s) assigned to them
+The tester user has 1 task(s) assigned to them
+
+The admin user has 33.33% of the total tasks assigned to them
+The user user has 16.67% of the total tasks assigned to them
+The test user has 16.67% of the total tasks assigned to them
+The new_user user has 16.67% of the total tasks assigned to them
+The tester user has 16.67% of the total tasks assigned to them
+
+The admin user has 0.0% of the total tasks assigned to them marked as complete
+The user user has 100.0% of the total tasks assigned to them marked as complete
+The test user has 100.0% of the total tasks assigned to them marked as complete
+The new_user user has 0.0% of the total tasks assigned to them marked as complete
+The tester user has 0.0% of the total tasks assigned to them marked as complete
+
+The admin user has 100.0% of the total tasks assigned to them marked as incomplete
+The user user has 0.0% of the total tasks assigned to them marked as incomplete
+The test user has 0.0% of the total tasks assigned to them marked as incomplete
+The new_user user has 100.0% of the total tasks assigned to them marked as incomplete
+The tester user has 100.0% of the total tasks assigned to them marked as incomplete
+
+The admin user has 50.0% of the total tasks assigned to them marked as incomplete and overdue
+The user user has 0.0% of the total tasks assigned to them marked as incomplete and overdue
+The test user has 0.0% of the total tasks assigned to them marked as incomplete and overdue
+The new_user user has 100.0% of the total tasks assigned to them marked as incomplete and overdue
+The tester user has 0.0% of the total tasks assigned to them marked as incomplete and overdue
+
